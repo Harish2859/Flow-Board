@@ -94,7 +94,7 @@ function BoardPage() {
             .in("column_id", colIds)
             .order("position");
           if (te) throw te;
-          if (!cancelled) setTasks(ts ?? []);
+          if (!cancelled) setTasks((ts ?? []) as Task[]);
         } else {
           setTasks([]);
         }
@@ -363,7 +363,10 @@ function BoardPage() {
         toast.error(error.message);
         return;
       }
-      if (data) setTasks((prev) => (prev.find((t) => t.id === data.id) ? prev : [...prev, data]));
+      if (data) {
+        const newTask = data as Task;
+        setTasks((prev) => (prev.find((t) => t.id === newTask.id) ? prev : [...prev, newTask]));
+      }
       toast.success("Task added");
     },
     [tasks],
