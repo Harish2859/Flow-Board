@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { X, Loader2, UserPlus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { X, Loader2, UserPlus } from 'lucide-react';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface Props {
   boardId: string;
@@ -10,38 +10,19 @@ interface Props {
 }
 
 export function InviteModal({ boardId, onClose, onInvited }: Props) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const { data: profile, error: e1 } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", email.trim().toLowerCase())
-        .maybeSingle();
-      if (e1) throw e1;
-      if (!profile) {
-        toast.error("User not registered");
-        return;
-      }
-      const { error: e2 } = await supabase
-        .from("board_members")
-        .insert({ board_id: boardId, user_id: profile.id, role: "editor" });
-      if (e2) {
-        if (e2.code === "23505") {
-          toast.error("User is already a member");
-          return;
-        }
-        throw e2;
-      }
-      toast.success("Member invited");
+      await api.inviteMember(boardId, email.trim().toLowerCase());
+      toast.success('Member invited');
       onInvited();
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to invite");
+      toast.error(err instanceof Error ? err.message : 'Failed to invite');
     } finally {
       setBusy(false);
     }

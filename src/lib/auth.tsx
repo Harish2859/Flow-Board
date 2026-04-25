@@ -1,47 +1,53 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { api, setToken, type UserProfile } from './api';
 
 interface AuthCtx {
-  session: Session | null;
-  user: User | null;
+  user: UserProfile | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => void;
 }
 
-const Ctx = createContext<AuthCtx>({ session: null, user: null, loading: true, signOut: async () => {} });
+const Ctx = createContext<AuthCtx>({
+  user: null,
+  loading: true,
+  signIn: async () => {},
+  signUp: async () => {},
+  signOut: () => {},
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up listener FIRST
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setLoading(false);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    const token = localStorage.getItem('fb_token');
+    if (!token) { setLoading(false); return; }
+    api.me()
+      .then(setUser)
+      .catch(() => setToken(null))
+      .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <Ctx.Provider
-      value={{
-        session,
-        user: session?.user ?? null,
-        loading,
-        signOut: async () => {
-          await supabase.auth.signOut();
-        },
-      }}
-    >
-      {children}
-    </Ctx.Provider>
-  );
+  const signIn = async (email: string, password: string) => {
+    const { token, user } = await api.login(email, password);
+    setToken(token);
+    setUser(user);
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { token, user } = await api.signup(email, password);
+    setToken(token);
+    setUser(user);
+  };
+
+  const signOut = () => {
+    setToken(null);
+    setUser(null);
+  };
+
+  return <Ctx.Provider value={{ user, loading, signIn, signUp, signOut }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);
