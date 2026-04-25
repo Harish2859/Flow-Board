@@ -316,14 +316,11 @@ All routes except `/api/auth/signup` and `/api/auth/login` require an `Authoriza
 
 ---
 
-## License
+<img width="1920" height="918" alt="image" src="https://github.com/user-attachments/assets/a363be97-d311-4eb4-a796-f2a4f0f583db" />
+<img width="660" height="657" alt="image" src="https://github.com/user-attachments/assets/a14fc8f7-9061-4893-b29e-e8d78a3f7912" />
+<img width="1918" height="507" alt="image" src="https://github.com/user-attachments/assets/a8f06cf7-1195-4704-b25c-e7e42a626061" />
+<img width="1919" height="329" alt="image" src="https://github.com/user-attachments/assets/c62af67f-b5bb-4a76-9823-7fa3d9ea2a1e" />
 
-Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for full terms.
 
----
 
-<div align="center">
 
-Built by [Your Name](https://github.com/your-username)
-
-</div>
